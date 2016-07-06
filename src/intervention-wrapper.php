@@ -12,6 +12,8 @@ class WP_Intervention_Wrapper {
 
 	private $cache_file_path;
 
+	private $intervention_instance;
+
 
 
 	function __construct( $src=null, $intervention_args=array(), $options=array() ) {
@@ -40,46 +42,31 @@ class WP_Intervention_Wrapper {
 		) );
 
 
-		// Make the caching directory
-		$this->make_cache_dir();
-	}
-
-	private function make_cache_dir() {
-		wp_mkdir_p( static::get_cache_dir() );
 	}
 
 
-	public static function get_cache_dir() {
-		$uploads_info = wp_upload_dir();
-		$rtn = $uploads_info['basedir']  . '/intervention/cache/'; // TODO: automatically create cache dir at point of init
 
-		// Allow overide by devs...
-		return apply_filters( 'wpi_cache_directory', $rtn );
-	}
-
-	public static function get_cache_dir_uri() {
-		$uploads_info = wp_upload_dir();
-		$rtn = $uploads_info['basedir']  . '/intervention/cache/'; // TODO: automatically create cache dir at point of init
-
-		// Allow overide by devs...
-		return apply_filters( 'wpi_cache_directory', $rtn );
-	}
+	
 
 	public function process() {
 
 		// Init Intervention Library	
-		$this->image = Image::make( $this->src );
+		$this->intervention_instance = Image::make( $this->src );
 
-		// Force setting of cache path for this file
+		// Cache the setting of the cache path 
 		$this->set_cache_file_path();
 
-		// If we have a cache of this then just return that directly
-		if ( !$this->options['cache'] && $this->check_cache() ) {
-			dump("FROM CACHE");
-			return $this->get_cache_file_path();
+		// If we have a cache of this image then just return that directly
+		if ( $this->options['cache'] && $this->check_cache() ) {
+			dump("FROM CACHE");	
+			return $this->get_cache_file_path( 'uri' ); // return a URI not a DIR
 		}	
 		
 		dump("NOT FROM CACHE");
+
+		// Proxy all args to underlying Intevention library
+		// note: args will be called in order defined in the 
+		// $intervention_args array
 		foreach ($this->intervention_args as $sFn => $aFnArgs)
 		{
 			if (!is_array($aFnArgs))
@@ -87,11 +74,14 @@ class WP_Intervention_Wrapper {
 				$aFnArgs = [ $aFnArgs ];
 			}
 
-			call_user_func_array([$this->image, $sFn], $aFnArgs);
+			call_user_func_array([$this->intervention_instance, $sFn], $aFnArgs);
 		}
 
-		return $this->update_cache();
-
+		// Save resulting file to cache dir
+		$this->save_image();
+		
+		// Return a public URL to the image
+		return $this->get_cache_file_path( 'uri' );
 	
 	}
 
@@ -106,13 +96,25 @@ class WP_Intervention_Wrapper {
 		}
 	}
 
-	private function get_cache_file_path() {
+	private function get_cache_file_path( $type='directory' ) {
 
-		if ( empty($this->cache_file_path) ) {
+		$cache_file_path;		
+
+		if ( empty( $this->cache_file_path ) ) {
 			$this->set_cache_file_path();
+
 		} 
 
-		return $this->cache_file_path;
+		$cache_file_path = $this->cache_file_path;
+		
+		// TODO: account for situations where user has filtered the cache path
+		// we can't reply on str_replace or upload dir...
+		if ( $type === 'uri' ) {
+			$upload_dir = WP_Intervention::upload_dir();
+			$cache_file_path = str_replace( $upload_dir['basedir'], $upload_dir['baseurl'], $this->cache_file_path );
+		}
+
+		return $cache_file_path;
 	}
 
 	private function set_cache_file_path() {
@@ -127,21 +129,18 @@ class WP_Intervention_Wrapper {
 
 		$new_filename = $file_pathinfo['filename'] . '-' . hash('md5', $this->r_implode( $args, '-') ) . $ext;
 
-		$this->cache_file_path = static::get_cache_dir() . $new_filename;
+		$this->cache_file_path = WP_Intervention::get_cache_dir() . $new_filename;
 	}
 
 
-	private function update_cache() {
-		$rtn = $this->image->save( $this->get_cache_file_path(), $this->options['quality'] );
-
-		dump($rtn);
-
+	private function save_image() {
+		$rtn = $this->intervention_instance->save( $this->get_cache_file_path(), $this->options['quality'] );
 		return $rtn;
 	}
 
 
 	private function get_extension() {
-		$mime = $this->image->mime();
+		$mime = $this->intervention_instance->mime();
 		return "." . str_replace('image/', '', $mime);
 	}
 

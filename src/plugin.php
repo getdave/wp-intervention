@@ -8,6 +8,12 @@ class WP_Intervention
      * @var string
      */
     private $basename;
+
+
+
+    private static $cache_dir;
+
+    private static $wp_upload_dir;
  
     
     /**
@@ -32,20 +38,52 @@ class WP_Intervention
         }
  
         $this->loaded = true;
-        
+
+        // Add actions...
+        $this->add_actions();
+
+        // Create the cache dir if it doesn't exist
+        $this->make_cache_dir();    
+
     }
 
     private function add_actions() {
     	add_action( 'wpi_clean_cache', array( $this, 'remove_outdated_cache_files' ) );
+
+    	add_action( 'switch_blog', array( $this, 'clear_upload_dir_cache' ) );
+        
     }
+
+
+
+    public static function get_cache_dir() {
+
+    	if ( empty( static::$cache_dir ) ) {
+
+			$uploads_info = wp_upload_dir();
+			$rtn = $uploads_info['basedir']  . '/intervention/cache/'; // TODO: automatically create cache dir at point of init
+
+			// Allow overide by devs...
+			static::$cache_dir = apply_filters( 'wpi_cache_directory', $rtn );
+		}
+
+		return static::$cache_dir;
+	}
+
+
+
+	private function make_cache_dir() {
+		wp_mkdir_p( static::get_cache_dir() );
+	}
+
+
+
     
 	// Cron Tab to remove outdated cache files
 	public function remove_outdated_cache_files() {
-
-		dump("Clearing cached");
-		
+	
 		// TODO - make cache dir a filterable option on this core class not on the Lib Wrapper
-		$dir = WP_Intervention_Wrapper::get_cache_dir();
+		$dir = static::get_cache_dir();
 
 		/*** cycle through all files in the directory ***/
 		foreach (glob($dir."*") as $file) {
@@ -55,6 +93,18 @@ class WP_Intervention
 			    unlink($file);
 			}
 		}	
+	}
+
+
+	public static function upload_dir() {
+		if ( empty( self::$wp_upload_dir ) ) {
+			self::$wp_upload_dir = wp_upload_dir();
+		}
+		return self::$wp_upload_dir;
+	}
+
+	public static function clear_upload_dir_cache() {
+		self::$wp_upload_dir = null;
 	}
 
 	public static function activated() 
