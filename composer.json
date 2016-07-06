@@ -1,0 +1,13 @@
+{
+    "name": "davidsmith/intervention-image-manipulation",
+    "authors": [
+        {
+            "name": "David Smith",
+            "email": "david.smith@mrbandfriends.co.uk"
+        }
+    ],
+    "require": {
+        "intervention/image": "^2.3",
+        "symfony/var-dumper": "^3.1"
+    }
+}
