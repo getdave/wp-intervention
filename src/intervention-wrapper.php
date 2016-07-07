@@ -29,11 +29,14 @@ class WP_Intervention_Wrapper {
 		// image.intervention.io
 		$this->intervention_args 	= $intervention_args;
 		
-		// Options
-		$this->options 			= array_merge( array(
+		// Allow defaults to be overriden on a global basis
+		$default_options = apply_filters('wpi_default_options', array(
 			'quality'		=> 80,
 			'cache'			=> true
-		), $options);
+		));
+
+		// Set the options
+		$this->options 	= array_merge( $default_options, $options);
 
 
 		// Set Image driver (gd by default)
@@ -58,11 +61,11 @@ class WP_Intervention_Wrapper {
 
 		// If we have a cache of this image then just return that directly
 		if ( $this->options['cache'] && $this->check_cache() ) {
-			dump("FROM CACHE");	
+			//dump("FROM CACHE");	
 			return $this->get_cache_file_path( 'uri' ); // return a URI not a DIR
 		}	
 		
-		dump("NOT FROM CACHE");
+		//dump("NOT FROM CACHE");
 
 		// Proxy all args to underlying Intevention library
 		// note: args will be called in order defined in the 

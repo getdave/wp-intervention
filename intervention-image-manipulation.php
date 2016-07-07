@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Intervention Image Manipulation
-Plugin URI: http://wordpress.org/plugins/hello-dolly/
-Description: Test
-Author: Mr Foo
+Plugin URI: https://github.com/getdave/wp-intervention/
+Description: On demand image manipulation via the Intervention Library (by Oliver Vogel).
+Author: David Smith
 Version: 0.1
-Author URI: http://www.wordpress.org
+Author URI: http://www.aheadcreative.com
 */
 
 // If this file is called directly, abort.
@@ -17,7 +17,7 @@ if ( ! defined( 'WPINC' ) ) {
 require_once __DIR__ . '/vendor/autoload.php';
 
 
-// Plugin core
+// Plugin core Class (WP_Intervention)
 require_once __DIR__ . '/src/plugin.php';
 
 // Wrapper for Intervention Library
