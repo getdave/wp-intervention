@@ -1,13 +1,16 @@
 {
-    "name": "davidsmith/intervention-image-manipulation",
+    "name": "getdave/wp-intervention",
     "authors": [
         {
             "name": "David Smith",
-            "email": "david.smith@mrbandfriends.co.uk"
+            "email": "getdavemail@gmail.com"
         }
     ],
     "require": {
-        "intervention/image": "^2.3",
-        "symfony/var-dumper": "^3.1"
+        "intervention/image": "^2.3"        
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^3.1",
+        "php-mock/php-mock-phpunit": "^0.3"
     }
 }

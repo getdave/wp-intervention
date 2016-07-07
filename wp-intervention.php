@@ -1,12 +1,15 @@
 <?php
-/*
-Plugin Name: Intervention Image Manipulation
-Plugin URI: https://github.com/getdave/wp-intervention/
-Description: On demand image manipulation via the Intervention Library (by Oliver Vogel).
-Author: David Smith
-Version: 0.1
-Author URI: http://www.aheadcreative.com
-*/
+/**
+ * Plugin Name: WP Intervention Image Manipulation
+ * Version: 0.1
+ * Description: A fully featured, on demand image manipulation tool for WordPress powered by the  <a href="http://image.intervention.io/">Intervention Library</a> (by Oliver Vogel).
+ * Author: David Smith
+ * Author URI: https://www.aheadcreative.com
+ * Plugin URI: https://github.com/getdave/wp-intervention/
+ * Text Domain: wp-intervention
+ * Domain Path: /languages
+ * @package WP Intervention
+ */
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
