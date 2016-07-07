@@ -4,7 +4,7 @@
 use Intervention\Image\ImageManagerStatic as Image;
 
 
-class WP_Intervention_Wrapper {
+class Intervention_Wrapper {
 
 	private $src;
 	private $intervention_args;
