@@ -10,6 +10,9 @@ class ComposerStaticInit014b6ab071b4a2d341f60a1ed5c54e80
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
+        'a62ac72e328e3d4b33ed468b4d61f53d' => __DIR__ . '/../..' . '/src/plugin.php',
+        'c4520504243ef15bb63d1a84497082dd' => __DIR__ . '/../..' . '/src/intervention-wrapper.php',
+        'ae56fa577af8b0644973b323e91e2e33' => __DIR__ . '/../..' . '/src/globals.php',
     );
 
     public static $prefixLengthsPsr4 = array (
