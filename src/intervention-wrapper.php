@@ -1,7 +1,7 @@
 <?php
 
 // import the Intervention Image Manager Class
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
 
 
 class Intervention_Wrapper {
@@ -13,6 +13,8 @@ class Intervention_Wrapper {
 	private $cache_file_path;
 
 	private $intervention_instance;
+
+	private $manager;
 
 
 
@@ -39,13 +41,9 @@ class Intervention_Wrapper {
 		$this->options 	= array_merge( $default_options, $options);
 
 
-		// Set Image driver (gd by default)
-		Image::configure( array(
-			'driver' => apply_filters('wpi_driver', 'gd' )
-		) );
-
-
+		
 	}
+
 
 
 
@@ -54,7 +52,9 @@ class Intervention_Wrapper {
 	public function process() {
 
 		// Init Intervention Library	
-		$this->intervention_instance = Image::make( $this->src );
+		$this->intervention_instance = $this->manager->make( $this->src );
+
+
 
 		// Cache the setting of the cache path 
 		$this->set_cache_file_path();
@@ -147,6 +147,18 @@ class Intervention_Wrapper {
 		return "." . str_replace('image/', '', $mime);
 	}
 
+	public function set_manager( $alt_manager=null ) {
+
+		if( !empty( $alt_manager) ) { // allow to overide dependency via setter injection
+			$this->manager = $alt_manager;
+		} else {
+			// Set Image driver (gd by default)
+			$this->manager = new ImageManager( array(
+				'driver' => apply_filters('wpi_driver', 'gd' )
+			) );
+		}
+	}
+
 	
 	/**
 	 * RECURSIVE IMPLODE
@@ -157,6 +169,12 @@ class Intervention_Wrapper {
 	private function r_implode( $pieces, $glue ) {
 		
 	  	$retVal = array_map(function($item) use ($glue) {
+
+	  		// Handle PHP CLosures which cannot be converted into a string
+	  		if ( is_callable ( $item ) ) {
+	  			$item = 'closure';
+	  		}
+
 	  		if( is_array( $item ) ) {
 	  			return $this->r_implode( $item, $glue );
 	  		} else {
