@@ -14,6 +14,8 @@ class CoreTest extends \PHPUnit_Framework_TestCase
 
     private $image_manager_stub;
 
+    private $intervention_image_stub;
+
     public function setUp()
     {
         // Setup basic Image Manager Stub to avoid calls to make
