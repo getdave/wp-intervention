@@ -33,10 +33,10 @@ class CoreTest extends \PHPUnit_Framework_TestCase
         // Stub mime and save methods on Image instance
         $intervention_image_stub = $this->getMockBuilder('\Intervention\Image\Image')
             ->setMethods(array(
-                'mime',
-                'save',
                 'blur',
                 'fit',
+                'mime',
+                'save',
             ))
             ->getMock();
 
@@ -78,5 +78,65 @@ class CoreTest extends \PHPUnit_Framework_TestCase
         $subject->set_manager($this->image_manager_stub);
 
         $subject->process();
+    }
+
+    public function test_creates_cached_file()
+    {
+
+        // Stub mime and save methods on Image instance
+        $intervention_image_stub = $this->getMockBuilder('\Intervention\Image\Image')
+            ->setMethods(array(
+                'mime',
+                'save',
+                'blur',
+                'fit',
+                'resize',
+                'pixelate',
+            ))
+            ->getMock();
+
+        $intervention_image_stub
+            ->expects($this->any())
+            ->method('mime')
+            ->will($this->returnValue('image/png'));
+
+        $intervention_image_stub
+            ->expects($this->any())
+            ->method('save')
+            ->will($this->returnValue('some_path_to_file_system'));
+
+        // Pass mocked Image Manager 
+        $this->image_manager_stub
+            ->expects($this->any())
+            ->method('make')
+            ->will($this->returnValue($intervention_image_stub));
+
+        // ACT
+        $subject_1 = new Intervention_Wrapper('a-fake-image.png', array(
+            'blur' => 30,
+            'fit' => [300, 200],
+        ), array(
+            'cache' => false,
+        ));
+
+        $subject_1->set_manager($this->image_manager_stub);
+
+        $subject_1->process();
+
+        $subject_2 = new Intervention_Wrapper('a-second-fake-image.png', array(
+            'resize' => [1200, 183],
+            'pixelate' => 13,
+        ), array(
+            'cache' => false,
+        ));
+
+        $subject_2->set_manager($this->image_manager_stub);
+
+        $subject_2->process();
+
+        // ASSERT
+        $this->assertContains('wp-content/uploads/intervention/cache/a-fake-image-30-300-200.png', $subject_1->get_cached_file_path());
+
+        $this->assertContains('wp-content/uploads/intervention/cache/a-second-fake-image-13-1200-183.png', $subject_2->get_cached_file_path());
     }
 }

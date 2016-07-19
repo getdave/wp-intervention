@@ -49,15 +49,26 @@ class Intervention_Wrapper
 
         // If we have a cache of this image then just return that directly
         if ($this->options['cache'] && $this->check_cache()) {
-            //dump("FROM CACHE");	
-            return $this->get_cache_file_path('uri'); // return a URI not a DIR
+            return $this->get_cached_file_uri(); // return a URI not a DIR
         }
 
-        //dump("NOT FROM CACHE");
+        // Proxy to Intervention
+        $this->proxy_to_intervention();
 
-        // Proxy all args to underlying Intevention library
-        // note: args will be called in order defined in the 
-        // $intervention_args array
+        // Save resulting file to cache dir
+        $this->save_image();
+
+        // Return a public URL to the image
+        return $this->get_cached_file_uri();
+    }
+
+    /**
+     *  Proxies all args to underlying Intevention library
+     *  args will be called in order defined in the 
+     *  $intervention_args array.
+     */
+    public function proxy_to_intervention()
+    {
         foreach ($this->intervention_args as $sFn => $aFnArgs) {
             if (!is_array($aFnArgs)) {
                 $aFnArgs = [$aFnArgs];
@@ -65,34 +76,32 @@ class Intervention_Wrapper
 
             call_user_func_array([$this->intervention_instance, $sFn], $aFnArgs);
         }
-
-        // Save resulting file to cache dir
-        $this->save_image();
-
-        // Return a public URL to the image
-        return $this->get_cache_file_path('uri');
     }
 
     private function check_cache()
     {
-        $cache_file_path = $this->get_cache_file_path();
+        $cache_file_path = $this->get_cached_file_path();
 
         if (file_exists($cache_file_path)) {
             // Update the timestamp on the file to show it's been accessed
             touch($cache_file_path);
 
-            return $cache_file_path;
+            return true;
         }
     }
 
-    private function get_cache_file_path($type = 'directory')
+    public function get_cached_file_path()
     {
-        $cache_file_path;
+        return $this->get_cached_file('path');
+    }
 
-        if (empty($this->cache_file_path)) {
-            $this->set_cache_file_path();
-        }
+    public function get_cached_file_uri()
+    {
+        return $this->get_cached_file('uri');
+    }
 
+    private function get_cached_file($type)
+    {
         $cache_file_path = $this->cache_file_path;
 
         // TODO: account for situations where user has filtered the cache path
@@ -116,14 +125,14 @@ class Intervention_Wrapper
 
         $file_pathinfo = pathinfo($this->src);
 
-        $new_filename = $file_pathinfo['filename'].'-'.hash('md5', $this->r_implode($args, '-')).$ext;
+        $new_filename = $file_pathinfo['filename'].'-'.$this->r_implode($args, '-').$ext;
 
         $this->cache_file_path = WP_Intervention::get_cache_dir().$new_filename;
     }
 
     private function save_image()
     {
-        $rtn = $this->intervention_instance->save($this->get_cache_file_path(), $this->options['quality']);
+        $rtn = $this->intervention_instance->save($this->get_cached_file_path(), $this->options['quality']);
 
         return $rtn;
     }
@@ -135,6 +144,10 @@ class Intervention_Wrapper
         return '.'.str_replace('image/', '', $mime);
     }
 
+    /**
+     * Enables overide of dependency via setter injection.
+     * Primarily used for testing purposes.
+     */
     public function set_manager($alt_manager = null)
     {
         if (!empty($alt_manager)) { // allow to overide dependency via setter injection
