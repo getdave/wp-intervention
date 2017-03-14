@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+
+# Vendor itself is not ignored because 
+vendor/
+!vendor/intervention
+!vendor/composer
+!vendor/autoload.php

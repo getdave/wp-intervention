@@ -1,0 +1,23 @@
+{
+    "name": "getdave/wp-intervention",
+    "authors": [
+        {
+            "name": "David Smith",
+            "email": "getdavemail@gmail.com"
+        }
+    ],
+    "require": {
+        "intervention/image": "^2.3"        
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^3.1",
+        "php-mock/php-mock-phpunit": "^0.3"
+    },
+    "autoload": {
+        "files": [
+            "src/plugin.php",
+            "src/intervention-wrapper.php",
+            "src/globals.php"
+        ]
+    }
+}
