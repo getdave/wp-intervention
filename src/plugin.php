@@ -61,8 +61,8 @@ class WP_Intervention
     	if ( empty( static::$cache_dir ) ) {
 
 			$uploads_info = wp_upload_dir();
-			$rtn = $uploads_info['basedir']  . '/intervention/cache/'; // TODO: automatically create cache dir at point of init
-
+			$rtn = $uploads_info['basedir']  . '/intervention/cache/'; 
+            
 			// Allow overide by devs...
 			static::$cache_dir = apply_filters( 'wpi_cache_directory', $rtn );
 		}
