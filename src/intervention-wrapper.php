@@ -1,6 +1,5 @@
 <?php
 
-// import the Intervention Image Manager Class
 use Intervention\Image\ImageManagerStatic as Image;
 
 
@@ -121,6 +120,7 @@ class Intervention_Wrapper {
 	}
 
 	private function set_cache_file_path() {
+		// Strip PHP callables out of the args 
 		$args = $this->strip_callables($this->intervention_args);
 
 		// Sort the array by key to ensure consistency of caching filename
@@ -130,7 +130,10 @@ class Intervention_Wrapper {
 
 		$file_pathinfo = pathinfo($this->src);
 
-		$new_filename = $file_pathinfo['filename'] . '-' . hash('md5', $this->r_implode( $args, '-') ) . $ext;
+		$new_filename = $file_pathinfo['filename'] . '-' . crc32( $this->r_implode( $args, '-') ) . $ext;
+
+		// Enable filtering of the filename on a per file basis
+		$new_filename = apply_filters('wpi_cache_file_name', $new_filename, $file_pathinfo['filename'], $ext, $args);
 
 		$this->cache_file_path = WP_Intervention::get_cache_dir() . $new_filename;
 	}

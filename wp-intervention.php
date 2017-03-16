@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WP Intervention Image Manipulation
- * Version: 0.1
+ * Version: 1.0
  * Description: A fully featured, on demand image manipulation tool for WordPress powered by the  <a href="http://image.intervention.io/">Intervention Library</a> (by Oliver Vogel).
  * Author: David Smith
  * Author URI: https://www.aheadcreative.com
