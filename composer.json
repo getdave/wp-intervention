@@ -1,13 +1,18 @@
 {
     "name": "getdave/wp-intervention",
+    "description": "WP Intervention provides on-demand image manipulation for WordPress via the Intervention Library",
+    "license": "MIT",
     "authors": [
         {
             "name": "David Smith",
-            "email": "getdavemail@gmail.com"
+            "email": "getdavemail@gmail.com",
+            "homepage": "https://aheadcreative.co.uk"
         }
     ],
+    "type": "wordpress-plugin",
     "require": {
-        "intervention/image": "^2.3"        
+        "intervention/image": "^2.3",
+        "composer/installers": "v1.0.6"      
     },
     "require-dev": {
         "symfony/var-dumper": "^3.1",
