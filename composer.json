@@ -12,7 +12,7 @@
     "type": "wordpress-plugin",
     "require": {
         "intervention/image": "^2.3",
-        "composer/installers": "v1.0.6"      
+        "composer/installers": "*"      
     },
     "require-dev": {
         "symfony/var-dumper": "^3.1",
