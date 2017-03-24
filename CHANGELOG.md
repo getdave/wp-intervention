@@ -6,6 +6,11 @@ For more information about keeping good change logs please refer to [keep a chan
 
 ## Changelog
 
+## [1.0.3]
+
+### Changed
+* Set composer installs to use `*` as version.
+
 ## [1.0.0]
 
 Initial full release of the Plugin.
