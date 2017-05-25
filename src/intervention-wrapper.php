@@ -36,35 +36,29 @@ class Intervention_Wrapper {
 
 		// Set the options
 		$this->options 	= array_merge( $default_options, $options);
-
-
-		// Set Image driver (gd by default)
-		Image::configure( array(
-			'driver' => apply_filters('wpi_driver', 'gd' )
-		) );
-
-
 	}
 
 
 
 
 
-	public function process() {
-
-		// Init Intervention Library
-		$this->intervention_instance = Image::make( $this->src );
+	public function process( $return_instance = false ) {
 
 		// Cache the setting of the cache path
 		$this->set_cache_file_path();
 
 		// If we have a cache of this image then just return that directly
 		if ( $this->options['cache'] && $this->check_cache() ) {
-			//dump("FROM CACHE");
 			return $this->get_cache_file_path( 'uri' ); // return a URI not a DIR
 		}
 
-		//dump("NOT FROM CACHE");
+		// Initialise Intervention.io
+		// only do this if we absolutely have to as even initialisation introduces
+		// significant overheads and will damage performance
+		Image::configure( array(
+			'driver' => apply_filters('wpi_driver', 'gd' )
+		) );		
+		$this->intervention_instance = Image::make( $this->src );
 
 		// Proxy all args to underlying Intevention library
 		// note: args will be called in order defined in the
@@ -82,9 +76,13 @@ class Intervention_Wrapper {
 		// Save resulting file to cache dir
 		$this->save_image();
 
-		// Return a public URL to the image
-		return $this->get_cache_file_path( 'uri' );
+		// If user has requested the raw Intervention instance then return that
+		if ($return_instance) {
+			return $this->intervention_instance;
+		}
 
+		// ...otherwise, return a public URL to the image
+		return $this->get_cache_file_path( 'uri' );
 	}
 
 
@@ -104,7 +102,6 @@ class Intervention_Wrapper {
 
 		if ( empty( $this->cache_file_path ) ) {
 			$this->set_cache_file_path();
-
 		}
 
 		$cache_file_path = $this->cache_file_path;
@@ -126,11 +123,11 @@ class Intervention_Wrapper {
 		// Sort the array by key to ensure consistency of caching filename
 		ksort($args);
 
-		$ext = $this->get_extension();
-
 		$file_pathinfo = pathinfo($this->src);
 
-		$new_filename = $file_pathinfo['filename'] . '-' . crc32( $this->r_implode( $args, '-') ) . $ext;
+		$ext = $file_pathinfo['extension'];
+		
+		$new_filename = $file_pathinfo['filename'] . '-' . crc32( $this->r_implode( $args, '-') ) . "." . $ext;
 
 		// Enable filtering of the filename on a per file basis
 		$new_filename = apply_filters('wpi_cache_file_name', $new_filename, $file_pathinfo['filename'], $ext, $args);
@@ -142,12 +139,6 @@ class Intervention_Wrapper {
 	private function save_image() {
 		$rtn = $this->intervention_instance->save( $this->get_cache_file_path(), $this->options['quality'] );
 		return $rtn;
-	}
-
-
-	private function get_extension() {
-		$mime = $this->intervention_instance->mime();
-		return "." . str_replace('image/', '', $mime);
 	}
 
 
