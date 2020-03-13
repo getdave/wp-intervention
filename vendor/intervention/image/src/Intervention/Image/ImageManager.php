@@ -3,6 +3,8 @@
 namespace Intervention\Image;
 
 use Closure;
+use Intervention\Image\Exception\MissingDependencyException;
+use Intervention\Image\Exception\NotSupportedException;
 
 class ImageManager
 {
@@ -11,16 +13,16 @@ class ImageManager
      *
      * @var array
      */
-    public $config = array(
+    public $config = [
         'driver' => 'gd'
-    );
+    ];
 
     /**
      * Creates new instance of Image Manager
      *
      * @param array $config
      */
-    public function __construct(array $config = array())
+    public function __construct(array $config = [])
     {
         $this->checkRequirements();
         $this->configure($config);
@@ -30,8 +32,10 @@ class ImageManager
      * Overrides configuration settings
      *
      * @param array $config
+     *
+     * @return self
      */
-    public function configure(array $config = array())
+    public function configure(array $config = [])
     {
         $this->config = array_replace($this->config, $config);
 
@@ -53,8 +57,8 @@ class ImageManager
     /**
      * Creates an empty image canvas
      *
-     * @param  integer $width
-     * @param  integer $height
+     * @param  int   $width
+     * @param  int   $height
      * @param  mixed $background
      *
      * @return \Intervention\Image\Image
@@ -69,7 +73,7 @@ class ImageManager
      * (requires additional package intervention/imagecache)
      *
      * @param Closure $callback
-     * @param integer $lifetime
+     * @param int     $lifetime
      * @param boolean $returnObj
      *
      * @return Image
@@ -88,7 +92,7 @@ class ImageManager
             return $imagecache->get($lifetime, $returnObj);
         }
 
-        throw new \Intervention\Image\Exception\MissingDependencyException(
+        throw new MissingDependencyException(
             "Please install package intervention/imagecache before running this function."
         );
     }
@@ -100,15 +104,25 @@ class ImageManager
      */
     private function createDriver()
     {
-        $drivername = ucfirst($this->config['driver']);
-        $driverclass = sprintf('Intervention\\Image\\%s\\Driver', $drivername);
+        if (is_string($this->config['driver'])) {
+            $drivername = ucfirst($this->config['driver']);
+            $driverclass = sprintf('Intervention\\Image\\%s\\Driver', $drivername);
 
-        if (class_exists($driverclass)) {
-            return new $driverclass;
+            if (class_exists($driverclass)) {
+                return new $driverclass;
+            }
+
+            throw new NotSupportedException(
+                "Driver ({$drivername}) could not be instantiated."
+            );
         }
 
-        throw new \Intervention\Image\Exception\NotSupportedException(
-            "Driver ({$drivername}) could not be instantiated."
+        if ($this->config['driver'] instanceof AbstractDriver) {
+            return $this->config['driver'];
+        }
+
+        throw new NotSupportedException(
+            "Unknown driver type."
         );
     }
 
@@ -120,7 +134,7 @@ class ImageManager
     private function checkRequirements()
     {
         if ( ! function_exists('finfo_buffer')) {
-            throw new \Intervention\Image\Exception\MissingDependencyException(
+            throw new MissingDependencyException(
                 "PHP Fileinfo extension must be installed/enabled to use Intervention Image."
             );
         }

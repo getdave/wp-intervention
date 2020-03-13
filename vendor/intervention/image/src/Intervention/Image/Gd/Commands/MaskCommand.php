@@ -2,7 +2,9 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-class MaskCommand extends \Intervention\Image\Commands\AbstractCommand
+use Intervention\Image\Commands\AbstractCommand;
+
+class MaskCommand extends AbstractCommand
 {
     /**
      * Applies an alpha mask to an image
@@ -18,7 +20,7 @@ class MaskCommand extends \Intervention\Image\Commands\AbstractCommand
         $image_size = $image->getSize();
 
         // create empty canvas
-        $canvas = $image->getDriver()->newImage($image_size->width, $image_size->height, array(0,0,0,0));
+        $canvas = $image->getDriver()->newImage($image_size->width, $image_size->height, [0,0,0,0]);
 
         // build mask image from source
         $mask = $image->getDriver()->init($mask_source);

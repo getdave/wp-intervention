@@ -2,6 +2,8 @@
 
 namespace Intervention\Image\Gd;
 
+use Intervention\Image\Exception\NotReadableException;
+use Intervention\Image\Exception\NotSupportedException;
 use Intervention\Image\Image;
 
 class Decoder extends \Intervention\Image\AbstractDecoder
@@ -14,37 +16,54 @@ class Decoder extends \Intervention\Image\AbstractDecoder
      */
     public function initFromPath($path)
     {
-        $info = @getimagesize($path);
-
-        if ($info === false) {
-            throw new \Intervention\Image\Exception\NotReadableException(
-                "Unable to read image from file ({$path})."
+        if ( ! file_exists($path)) {
+            throw new NotReadableException(
+                "Unable to find file ({$path})."
             );
         }
 
+        // get mime type of file
+        $mime = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
+
         // define core
-        switch ($info[2]) {
-            case IMAGETYPE_PNG:
+        switch (strtolower($mime)) {
+            case 'image/png':
+            case 'image/x-png':
                 $core = @imagecreatefrompng($path);
                 break;
 
-            case IMAGETYPE_JPEG:
+            case 'image/jpg':
+            case 'image/jpeg':
+            case 'image/pjpeg':
                 $core = @imagecreatefromjpeg($path);
+                if (!$core) {
+                    $core= @imagecreatefromstring(file_get_contents($path));
+                }
                 break;
 
-            case IMAGETYPE_GIF:
+            case 'image/gif':
                 $core = @imagecreatefromgif($path);
                 break;
 
+            case 'image/webp':
+            case 'image/x-webp':
+                if ( ! function_exists('imagecreatefromwebp')) {
+                    throw new NotReadableException(
+                        "Unsupported image type. GD/PHP installation does not support WebP format."
+                    );
+                }
+                $core = @imagecreatefromwebp($path);
+                break;
+
             default:
-                throw new \Intervention\Image\Exception\NotReadableException(
-                    "Unable to read image type. GD driver is only able to decode JPG, PNG or GIF files."
+                throw new NotReadableException(
+                    "Unsupported image type. GD driver is only able to decode JPG, PNG, GIF or WebP files."
                 );
         }
 
-        if ($core === false) {
-            throw new \Intervention\Image\Exception\NotReadableException(
-                "Unable to read image from file ({$path})."
+        if (empty($core)) {
+            throw new NotReadableException(
+                "Unable to decode image from file ({$path})."
             );
         }
 
@@ -52,7 +71,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
 
         // build image
         $image = $this->initFromGdResource($core);
-        $image->mime = $info['mime'];
+        $image->mime = $mime;
         $image->setFileInfoFromPath($path);
 
         return $image;
@@ -77,7 +96,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
      */
     public function initFromImagick(\Imagick $object)
     {
-        throw new \Intervention\Image\Exception\NotSupportedException(
+        throw new NotSupportedException(
             "Gd driver is unable to init from Imagick object."
         );
     }
@@ -93,7 +112,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
         $resource = @imagecreatefromstring($binary);
 
         if ($resource === false) {
-             throw new \Intervention\Image\Exception\NotReadableException(
+             throw new NotReadableException(
                 "Unable to init from given binary data."
             );
         }

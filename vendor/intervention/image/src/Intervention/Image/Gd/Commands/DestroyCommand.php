@@ -2,7 +2,9 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-class DestroyCommand extends \Intervention\Image\Commands\AbstractCommand
+use Intervention\Image\Commands\AbstractCommand;
+
+class DestroyCommand extends AbstractCommand
 {
     /**
      * Destroys current image core and frees up memory
@@ -15,7 +17,7 @@ class DestroyCommand extends \Intervention\Image\Commands\AbstractCommand
         // destroy image core
         imagedestroy($image->getCore());
 
-        // destroy backups    
+        // destroy backups
         foreach ($image->getBackups() as $backup) {
             imagedestroy($backup);
         }

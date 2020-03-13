@@ -11,12 +11,12 @@
     ],
     "type": "wordpress-plugin",
     "require": {
-        "intervention/image": "^2.3",
-        "composer/installers": "*"      
+        "intervention/image": "^2.5",
+        "composer/installers": "*"
     },
     "require-dev": {
-        "symfony/var-dumper": "^3.1",
-        "php-mock/php-mock-phpunit": "^0.3"
+        "symfony/var-dumper": "*",
+        "php-mock/php-mock-phpunit": "*"
     },
     "autoload": {
         "files": [

@@ -2,9 +2,12 @@
 
 namespace Intervention\Image\Imagick;
 
+use Intervention\Image\AbstractDecoder;
+use Intervention\Image\Exception\NotReadableException;
+use Intervention\Image\Exception\NotSupportedException;
 use Intervention\Image\Image;
 
-class Decoder extends \Intervention\Image\AbstractDecoder
+class Decoder extends AbstractDecoder
 {
     /**
      * Initiates new image from path in filesystem
@@ -18,8 +21,9 @@ class Decoder extends \Intervention\Image\AbstractDecoder
 
         try {
 
+            $core->setBackgroundColor(new \ImagickPixel('transparent'));
             $core->readImage($path);
-            $core->setImageType(\Imagick::IMGTYPE_TRUECOLORMATTE);
+            $core->setImageType(defined('\Imagick::IMGTYPE_TRUECOLORALPHA') ? \Imagick::IMGTYPE_TRUECOLORALPHA : \Imagick::IMGTYPE_TRUECOLORMATTE);
 
         } catch (\ImagickException $e) {
             throw new \Intervention\Image\Exception\NotReadableException(
@@ -44,7 +48,7 @@ class Decoder extends \Intervention\Image\AbstractDecoder
      */
     public function initFromGdResource($resource)
     {
-        throw new \Intervention\Image\Exception\NotSupportedException(
+        throw new NotSupportedException(
             'Imagick driver is unable to init from GD resource.'
         );
     }
@@ -78,11 +82,12 @@ class Decoder extends \Intervention\Image\AbstractDecoder
         $core = new \Imagick;
 
         try {
+            $core->setBackgroundColor(new \ImagickPixel('transparent'));
 
             $core->readImageBlob($binary);
 
         } catch (\ImagickException $e) {
-            throw new \Intervention\Image\Exception\NotReadableException(
+            throw new NotReadableException(
                 "Unable to read image from binary data.",
                 0,
                 $e

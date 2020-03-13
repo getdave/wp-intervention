@@ -2,7 +2,11 @@
 
 namespace Intervention\Image\Imagick;
 
-class Driver extends \Intervention\Image\AbstractDriver
+use Intervention\Image\AbstractDriver;
+use Intervention\Image\Exception\NotSupportedException;
+use Intervention\Image\Image;
+
+class Driver extends AbstractDriver
 {
     /**
      * Creates new instance of driver
@@ -13,7 +17,7 @@ class Driver extends \Intervention\Image\AbstractDriver
     public function __construct(Decoder $decoder = null, Encoder $encoder = null)
     {
         if ( ! $this->coreAvailable()) {
-            throw new \Intervention\Image\Exception\NotSupportedException(
+            throw new NotSupportedException(
                 "ImageMagick module not available with this PHP installation."
             );
         }
@@ -25,9 +29,9 @@ class Driver extends \Intervention\Image\AbstractDriver
     /**
      * Creates new image instance
      *
-     * @param  integer $width
-     * @param  integer $height
-     * @param  string  $background
+     * @param  int     $width
+     * @param  int     $height
+     * @param  mixed   $background
      * @return \Intervention\Image\Image
      */
     public function newImage($width, $height, $background = null)
@@ -42,7 +46,7 @@ class Driver extends \Intervention\Image\AbstractDriver
         $core->setColorspace(\Imagick::COLORSPACE_UNDEFINED);
 
         // build image
-        $image = new \Intervention\Image\Image(new static, $core);
+        $image = new Image(new static, $core);
 
         return $image;
     }

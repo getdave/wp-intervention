@@ -2,6 +2,10 @@
 
 namespace Intervention\Image;
 
+use GuzzleHttp\Psr7\Stream;
+use Intervention\Image\Exception\NotReadableException;
+use Psr\Http\Message\StreamInterface;
+
 abstract class AbstractDecoder
 {
     /**
@@ -31,7 +35,7 @@ abstract class AbstractDecoder
     /**
      * Initiates new image from Imagick object
      *
-     * @param  Imagick $object
+     * @param \Imagick $object
      * @return \Intervention\Image\Image
      */
     abstract public function initFromImagick(\Imagick $object);
@@ -54,18 +58,30 @@ abstract class AbstractDecoder
     }
 
     /**
-     * Init from fiven URL
+     * Init from given URL
      *
      * @param  string $url
      * @return \Intervention\Image\Image
      */
     public function initFromUrl($url)
     {
-        if ($data = @file_get_contents($url)) {
+        
+        $options = [
+            'http' => [
+                'method'=>"GET",
+                'header'=>"Accept-language: en\r\n".
+                "User-Agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2\r\n"
+          ]
+        ];
+        
+        $context  = stream_context_create($options);
+        
+
+        if ($data = @file_get_contents($url, false, $context)) {
             return $this->initFromBinary($data);
         }
 
-        throw new \Intervention\Image\Exception\NotReadableException(
+        throw new NotReadableException(
             "Unable to init from given url (".$url.")."
         );
     }
@@ -73,20 +89,42 @@ abstract class AbstractDecoder
     /**
      * Init from given stream
      *
-     * @param $stream
+     * @param StreamInterface|resource $stream
      * @return \Intervention\Image\Image
      */
     public function initFromStream($stream)
     {
-        $offset = ftell($stream);
-        rewind($stream);
-        $data = @stream_get_contents($stream);
-        fseek($stream, $offset);
+        if (!$stream instanceof StreamInterface) {
+            $stream = new Stream($stream);
+        }
+
+        try {
+            $offset = $stream->tell();
+        } catch (\RuntimeException $e) {
+            $offset = 0;
+        }
+
+        $shouldAndCanSeek = $offset !== 0 && $stream->isSeekable();
+
+        if ($shouldAndCanSeek) {
+            $stream->rewind();
+        }
+
+        try {
+            $data = $stream->getContents();
+        } catch (\RuntimeException $e) {
+            $data = null;
+        }
+
+        if ($shouldAndCanSeek) {
+            $stream->seek($offset);
+        }
+
         if ($data) {
             return $this->initFromBinary($data);
         }
 
-        throw new \Intervention\Image\Exception\NotReadableException(
+        throw new NotReadableException(
             "Unable to init from given stream"
         );
     }
@@ -153,7 +191,11 @@ abstract class AbstractDecoder
     public function isFilePath()
     {
         if (is_string($this->data)) {
-            return is_file($this->data);
+            try {
+                return is_file($this->data);
+            } catch (\Exception $e) {
+                return false;
+            }
         }
 
         return false;
@@ -176,6 +218,7 @@ abstract class AbstractDecoder
      */
     public function isStream()
     {
+        if ($this->data instanceof StreamInterface) return true;
         if (!is_resource($this->data)) return false;
         if (get_resource_type($this->data) !== 'stream') return false;
 
@@ -220,7 +263,7 @@ abstract class AbstractDecoder
             return false;
         }
 
-        return base64_encode(base64_decode($this->data)) === $this->data;
+        return base64_encode(base64_decode($this->data)) === str_replace(["\n", "\r"], '', $this->data);
     }
 
     /**
@@ -289,17 +332,18 @@ abstract class AbstractDecoder
             case $this->isStream():
                 return $this->initFromStream($this->data);
 
-            case $this->isFilePath():
-                return $this->initFromPath($this->data);
-
             case $this->isDataUrl():
                 return $this->initFromBinary($this->decodeDataUrl($this->data));
 
+            case $this->isFilePath():
+                return $this->initFromPath($this->data);
+
+            // isBase64 has to be after isFilePath to prevent false positives
             case $this->isBase64():
                 return $this->initFromBinary(base64_decode($this->data));
 
             default:
-                throw new Exception\NotReadableException("Image source not readable");
+                throw new NotReadableException("Image source not readable");
         }
     }
 
