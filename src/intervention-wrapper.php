@@ -34,7 +34,7 @@ class Intervention_Wrapper {
 			array(
 				'quality' => 80,
 				'cache'   => true,
-				'debug'	  => defined( 'WP_DEBUG' ) ? WP_DEBUG : false,
+				'debug'   => defined( 'WP_DEBUG' ) ? WP_DEBUG : false,
 			)
 		);
 
@@ -78,12 +78,12 @@ class Intervention_Wrapper {
 			try {
 				call_user_func_array( array( $this->intervention_instance, $arg_name ), $arg_val );
 			} catch ( \Intervention\Image\Exception\NotSupportedException $e ) {
-				array_push($invalid_args, $arg_name);
+				array_push( $invalid_args, $arg_name );
 			}
 		}
 
 		if ( $this->options['debug'] ) {
-			throw new \InvalidArgumentException('WP Intervention called with unsupported arguments: ' . implode(', ', $invalid_args) . '.' );
+			throw new \InvalidArgumentException( 'WP Intervention called with unsupported arguments: ' . implode( ', ', $invalid_args ) . '.' );
 		}
 
 		// Save resulting file to cache dir
