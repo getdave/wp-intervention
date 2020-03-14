@@ -5,6 +5,7 @@
     "port": 5567,
     "testsPort": 5568,
     "config": {
+        "WP_DEBUG": true,
         "WP_DEBUG_DISPLAY": true,
         "SCRIPT_DEBUG": true
     }
