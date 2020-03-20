@@ -63,7 +63,7 @@ WP Intervention exposes a global helper `wp_intervention` for use in your Theme.
 
 The API for this is:
 
-```
+```php
 wp_intervention( string $src, array $intervention_args [, array $options] );
 ```
 
