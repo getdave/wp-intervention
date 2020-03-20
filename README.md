@@ -41,9 +41,13 @@ requires you to call the image helper functions manually (see [Usage](#usage) be
 
 ### Basic Usage
 
-WP Intervention exposes a global helper `wp_intervention` for use in your Theme. The API for this is
+WP Intervention exposes a global helper `wp_intervention` for use in your Theme.
 
-`wp_intervention( string $src, array $intervention_args [, array $options] );`
+The API for this is:
+
+```
+wp_intervention( string $src, array $intervention_args [, array $options] );
+```
 
 The first parameter (`$src`) is the source image to be processed. This can be either:
 
