@@ -5,9 +5,9 @@
   "author": "David Smith",
   "devDependencies": {
     "@wordpress/env": "^1.0.1",
-    "grunt": "*",
-    "grunt-wp-i18n": "*",
-    "grunt-wp-readme-to-markdown": "*"
+    "grunt": "^1.1.0",
+    "grunt-wp-i18n": "^1.0.3",
+    "grunt-wp-readme-to-markdown": "^2.0.1"
   },
   "scripts": {
     "preenv:*": "nvm install lts/* && nvm use",
