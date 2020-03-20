@@ -2,35 +2,53 @@
 
 WP Intervention provides on-demand image manipulation for WordPress via the [Intervention Library](http://image.intervention.io/).
 
-All image manipulation is handeled via the [Intervention Library](http://image.intervention.io/). This Plugin merely provides a wrapper around Intervention and a convenient global function for use with WordPress.
+## Why?
 
-This Plugin is aimed at __developers only__ and aims to be fully customisable via liberal usage of [WordPress filters](https://developer.wordpress.org/reference/functions/apply_filters/).
+Traditionally, WordPress only provides fairly basic image manipulation facilities (eg: resize, crop). But what if you need to do more with your images? This is where WP Intervention comes in.
 
-## Requirements
+With WP Intervention you have the full suite of PHP Intervention's [powerful image manipulation tools](http://image.intervention.io/) at your finger tips including:
+
+* [Blur](http://image.intervention.io/api/blur).
+* [Grayscale](http://image.intervention.io/api/greyscale).
+* [Mask](http://image.intervention.io/api/mask).
+
+...and many more!
+
+Resulting images are cached to avoid any further unnecessary processing.
+
+## How?
+
+All image manipulation is provided by the [PHP Intervention Library](http://image.intervention.io/).
+
+WP Intervention merely provides a wrapper around Intervention and a convenient global function for use with WordPress.
+
+This Plugin is currently aimed at __developers__ and aims to be fully customisable via liberal usage of [WordPress filters](https://developer.wordpress.org/reference/functions/apply_filters/).
+
+
+## Installation
+
+1. [Download a copy of this
+repository](https://github.com/getdave/wp-intervention/archive/master.zip).
+
+2. Unzip and place the resulting folder within your  WordPress Plugins directory (typically `wp-content/plugins`).
+
+3. Activate the Plugin from within WP Admin.
+
+Please note: you will not see any settings pages within WP Admin. This Plugin currently
+requires you to call the image helper functions manually (see [Usage](#usage) below).]
+
+### Requirements
 
 - PHP >=5.4
 - Fileinfo Extension
 
-## Supported Image Libraries
+### Supported Image Libraries
 
 - GD Library (>=2.0)
 - Imagick PHP extension (>=6.5.7)
 
 Please refer to the [Intervention Library](http://image.intervention.io/) for
 full details.
-
-## Installation
-
-[Download a copy of this
-repository](https://github.com/getdave/wp-intervention/archive/master.zip).
-
-Place within your WordPress install at `wp-content/plugins`.
-
-Activate the Plugin.
-
-Note: you will not see any settings pages within WP Admin. This Plugin currently
-requires you to call the image helper functions manually (see [Usage](#usage) below).
-
 
 ## Usage
 
