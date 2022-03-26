@@ -8,7 +8,7 @@
     "grunt": "^1.1.0",
     "grunt-wp-i18n": "^1.0.3",
     "grunt-wp-readme-to-markdown": "^2.0.1",
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.6"
   },
   "scripts": {
     "preenv:*": "nvm install lts/* && nvm use",
